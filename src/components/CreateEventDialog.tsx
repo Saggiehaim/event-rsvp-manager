@@ -11,9 +11,10 @@ import type { Event } from '@/lib/types'
 
 interface CreateEventDialogProps {
   onEventCreated: (event: Event) => void
+  googleApiKey?: string
 }
 
-export function CreateEventDialog({ onEventCreated }: CreateEventDialogProps) {
+export function CreateEventDialog({ onEventCreated, googleApiKey }: CreateEventDialogProps) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [location, setLocation] = useState('')
@@ -109,6 +110,7 @@ export function CreateEventDialog({ onEventCreated }: CreateEventDialogProps) {
             locationName={locationName}
             onAddressChange={handleAddressChange}
             onLocationNameChange={setLocationName}
+            googleApiKey={googleApiKey}
           />
 
           <div className="flex gap-3 pt-2">

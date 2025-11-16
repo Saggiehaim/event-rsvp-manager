@@ -11,24 +11,57 @@ interface LocationInputProps {
   locationName: string
   onAddressChange: (address: string, coordinates?: { lat: number; lng: number }) => void
   onLocationNameChange: (name: string) => void
+  googleApiKey?: string
 }
 
 interface PlacePrediction {
   description: string
   place_id: string
+  lat?: number
+  lng?: number
 }
 
 export function LocationInput({ 
   address, 
   locationName,
   onAddressChange, 
-  onLocationNameChange 
+  onLocationNameChange,
+  googleApiKey
 }: LocationInputProps) {
   const [predictions, setPredictions] = useState<PlacePrediction[]>([])
   const [showPredictions, setShowPredictions] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [googleLoaded, setGoogleLoaded] = useState(false)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const debounceTimer = useRef<NodeJS.Timeout | null>(null)
+  const autocompleteServiceRef = useRef<any>(null)
+  const placesServiceRef = useRef<any>(null)
+
+  useEffect(() => {
+    const win = window as any
+    if (googleApiKey && !win.google) {
+      const script = document.createElement('script')
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${googleApiKey}&libraries=places`
+      script.async = true
+      script.defer = true
+      script.onload = () => {
+        setGoogleLoaded(true)
+        if (win.google) {
+          autocompleteServiceRef.current = new win.google.maps.places.AutocompleteService()
+          const mapDiv = document.createElement('div')
+          const map = new win.google.maps.Map(mapDiv)
+          placesServiceRef.current = new win.google.maps.places.PlacesService(map)
+        }
+      }
+      document.head.appendChild(script)
+    } else if (win.google && !googleLoaded) {
+      setGoogleLoaded(true)
+      autocompleteServiceRef.current = new win.google.maps.places.AutocompleteService()
+      const mapDiv = document.createElement('div')
+      const map = new win.google.maps.Map(mapDiv)
+      placesServiceRef.current = new win.google.maps.places.PlacesService(map)
+    }
+  }, [googleApiKey, googleLoaded])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -57,42 +90,83 @@ export function LocationInput({
     debounceTimer.current = setTimeout(async () => {
       setIsLoading(true)
       try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value)}&limit=5&addressdetails=1`,
-          {
-            headers: {
-              'Accept': 'application/json',
+        const win = window as any
+        if (googleApiKey && googleLoaded && autocompleteServiceRef.current) {
+          autocompleteServiceRef.current.getPlacePredictions(
+            { input: value },
+            (predictions: any[], status: string) => {
+              setIsLoading(false)
+              if (status === win.google?.maps.places.PlacesServiceStatus.OK && predictions) {
+                const formattedPredictions = predictions.map((prediction) => ({
+                  description: prediction.description,
+                  place_id: prediction.place_id,
+                }))
+                setPredictions(formattedPredictions)
+                setShowPredictions(true)
+              } else {
+                setPredictions([])
+                setShowPredictions(false)
+              }
             }
-          }
-        )
-        
-        if (response.ok) {
-          const data = await response.json()
-          const formattedPredictions = data.map((item: any) => ({
-            description: item.display_name,
-            place_id: item.place_id.toString(),
-            lat: parseFloat(item.lat),
-            lng: parseFloat(item.lon)
-          }))
+          )
+        } else {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value)}&limit=5&addressdetails=1`,
+            {
+              headers: {
+                'Accept': 'application/json',
+              }
+            }
+          )
           
-          setPredictions(formattedPredictions)
-          setShowPredictions(formattedPredictions.length > 0)
+          if (response.ok) {
+            const data = await response.json()
+            const formattedPredictions = data.map((item: any) => ({
+              description: item.display_name,
+              place_id: item.place_id.toString(),
+              lat: parseFloat(item.lat),
+              lng: parseFloat(item.lon)
+            }))
+            
+            setPredictions(formattedPredictions)
+            setShowPredictions(formattedPredictions.length > 0)
+          }
+          setIsLoading(false)
         }
       } catch (error) {
         console.error('Address lookup failed:', error)
         setPredictions([])
         setShowPredictions(false)
-      } finally {
         setIsLoading(false)
       }
     }, 500)
   }
 
-  const handleSelectPrediction = (prediction: any) => {
-    onAddressChange(prediction.description, {
-      lat: prediction.lat,
-      lng: prediction.lng
-    })
+  const handleSelectPrediction = async (prediction: PlacePrediction) => {
+    const win = window as any
+    if (googleApiKey && googleLoaded && placesServiceRef.current && !prediction.lat) {
+      placesServiceRef.current.getDetails(
+        { placeId: prediction.place_id },
+        (place: any, status: string) => {
+          if (status === win.google?.maps.places.PlacesServiceStatus.OK && place) {
+            onAddressChange(prediction.description, {
+              lat: place.geometry.location.lat(),
+              lng: place.geometry.location.lng()
+            })
+          } else {
+            onAddressChange(prediction.description)
+          }
+        }
+      )
+    } else if (prediction.lat && prediction.lng) {
+      onAddressChange(prediction.description, {
+        lat: prediction.lat,
+        lng: prediction.lng
+      })
+    } else {
+      onAddressChange(prediction.description)
+    }
+    
     setShowPredictions(false)
     setPredictions([])
   }

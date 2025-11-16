@@ -5,13 +5,16 @@ import { CreateEventDialog } from '@/components/CreateEventDialog'
 import { EventCard } from '@/components/EventCard'
 import { EventDetail } from '@/components/EventDetail'
 import { AdminPage } from '@/components/AdminPage'
+import { SettingsDialog } from '@/components/SettingsDialog'
 import { CalendarBlank } from '@phosphor-icons/react'
+import { useGoogleMapsApiKey } from '@/lib/config'
 import type { Event, RSVP } from '@/lib/types'
 
 function App() {
   const [events, setEvents] = useKV<Event[]>('events', [])
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
   const [isAdminMode, setIsAdminMode] = useState(false)
+  const [googleApiKey] = useGoogleMapsApiKey()
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -84,6 +87,7 @@ function App() {
           onEventUpdate={handleEventUpdate}
           onEventDelete={handleEventDelete}
           onMembersUpdate={handleMembersUpdate}
+          googleApiKey={googleApiKey}
         />
         <Toaster position="top-center" />
       </div>
@@ -120,7 +124,8 @@ function App() {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <CreateEventDialog onEventCreated={handleEventCreated} />
+            <CreateEventDialog onEventCreated={handleEventCreated} googleApiKey={googleApiKey} />
+            <SettingsDialog />
           </div>
         </div>
 

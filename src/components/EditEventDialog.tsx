@@ -13,9 +13,10 @@ interface EditEventDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSave: (updatedEvent: Partial<Event>) => void
+  googleApiKey?: string
 }
 
-export function EditEventDialog({ event, open, onOpenChange, onSave }: EditEventDialogProps) {
+export function EditEventDialog({ event, open, onOpenChange, onSave, googleApiKey }: EditEventDialogProps) {
   const [name, setName] = useState(event.name)
   const [location, setLocation] = useState(event.location)
   const [locationName, setLocationName] = useState(event.locationName || '')
@@ -90,6 +91,7 @@ export function EditEventDialog({ event, open, onOpenChange, onSave }: EditEvent
             locationName={locationName}
             onAddressChange={handleAddressChange}
             onLocationNameChange={setLocationName}
+            googleApiKey={googleApiKey}
           />
 
           <div className="flex gap-3 pt-2">

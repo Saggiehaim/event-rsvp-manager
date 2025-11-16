@@ -22,6 +22,7 @@ interface AdminPageProps {
   onEventUpdate: (eventId: string, updatedEvent: Partial<Event>) => void
   onEventDelete: (eventId: string) => void
   onMembersUpdate: (eventId: string, rsvpIds: string[]) => void
+  googleApiKey?: string
 }
 
 export function AdminPage({ 
@@ -29,7 +30,8 @@ export function AdminPage({
   onBack, 
   onEventUpdate, 
   onEventDelete,
-  onMembersUpdate 
+  onMembersUpdate,
+  googleApiKey 
 }: AdminPageProps) {
   const [editingEvent, setEditingEvent] = useState<Event | null>(null)
   const [deletingEvent, setDeletingEvent] = useState<Event | null>(null)
@@ -178,6 +180,7 @@ export function AdminPage({
             onEventUpdate(editingEvent.id, updatedEvent)
             setEditingEvent(null)
           }}
+          googleApiKey={googleApiKey}
         />
       )}
 

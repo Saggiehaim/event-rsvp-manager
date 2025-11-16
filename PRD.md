@@ -13,10 +13,10 @@ A collaborative event management platform that enables hosts to create events wi
 ## Essential Features
 
 ### Event Creation
-- **Functionality**: Host creates an event by uploading a poster image, entering event name, location address (with Google Maps autocomplete), and optional location name
+- **Functionality**: Host creates an event by uploading a poster image, entering event name, location address (with Google Maps autocomplete when API key is configured, or OpenStreetMap fallback), and optional location name
 - **Purpose**: Provides a complete event identity with precise location data that can be shared with potential guests
 - **Trigger**: User clicks "Create Event" button on landing page
-- **Progression**: Click create button → Upload poster image → Enter event name → Type address (see Google Maps suggestions) → Select from autocomplete → Optionally add location name → Submit → Event created with unique shareable link and map coordinates
+- **Progression**: Click create button → Upload poster image → Enter event name → Type address (see autocomplete suggestions) → Select from autocomplete → Optionally add location name → Submit → Event created with unique shareable link and map coordinates
 - **Success criteria**: Event is saved with all details including coordinates, poster displays correctly, unique URL is generated for sharing, location can be opened in Google Maps
 
 ### Guest RSVP
@@ -47,6 +47,13 @@ A collaborative event management platform that enables hosts to create events wi
 - **Progression**: Click Admin Panel → View all events in list format → Select Edit to modify event details → Select Delete to remove event → Select Manage Members to add/remove attendees → Confirm changes → Return to main page
 - **Success criteria**: All events display with full details, edit updates persist correctly, delete removes event completely, member management updates RSVP list accurately
 
+### Settings Configuration
+- **Functionality**: User can configure their Google Maps API key for enhanced address autocomplete functionality
+- **Purpose**: Enables better address search experience with Google Places API while providing OpenStreetMap fallback
+- **Trigger**: User clicks "Settings" button on main page
+- **Progression**: Click Settings → Enter Google Maps API key (optional) → Save → API key stored securely → Address autocomplete uses Google Places when available
+- **Success criteria**: API key persists between sessions, autocomplete switches to Google Places when key is provided, falls back to OpenStreetMap when no key is set
+
 ## Edge Case Handling
 
 - **Missing poster image**: Display placeholder with event name/initials on colored background
@@ -58,6 +65,8 @@ A collaborative event management platform that enables hosts to create events wi
 - **Deleting events with RSVPs**: Show confirmation dialog with RSVP count warning before deletion
 - **Editing events with existing RSVPs**: Allow edits without affecting existing RSVP data
 - **Removing all members**: Allow clearing entire guest list if needed, show warning about total removal count
+- **No Google API key**: Fall back to OpenStreetMap Nominatim for address autocomplete when Google Maps API key is not configured
+- **Invalid Google API key**: Display error message and fall back to OpenStreetMap
 
 ## Design Direction
 
