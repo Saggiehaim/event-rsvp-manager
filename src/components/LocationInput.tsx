@@ -18,30 +18,6 @@ interface PlacePrediction {
   place_id: string
 }
 
-type GoogleMaps = {
-  maps: {
-    places: {
-      AutocompleteService: new () => {
-        getPlacePredictions(
-          request: { input: string; types?: string[] },
-          callback: (predictions: Array<{ description: string; place_id: string }> | null, status: string) => void
-        ): void
-      }
-      PlacesServiceStatus: { OK: string }
-    }
-    Geocoder: new () => {
-      geocode(
-        request: { placeId: string },
-        callback: (
-          results: Array<{ geometry: { location: { lat: () => number; lng: () => number } } }> | null,
-          status: string
-        ) => void
-      ): void
-    }
-    GeocoderStatus: { OK: string }
-  }
-}
-
 export function LocationInput({ 
   address, 
   locationName,
@@ -50,57 +26,9 @@ export function LocationInput({
 }: LocationInputProps) {
   const [predictions, setPredictions] = useState<PlacePrediction[]>([])
   const [showPredictions, setShowPredictions] = useState(false)
-  const [isLoadingScript, setIsLoadingScript] = useState(true)
-  const [scriptError, setScriptError] = useState(false)
-  const autocompleteService = useRef<any>(null)
-  const geocoder = useRef<any>(null)
+  const [isLoading, setIsLoading] = useState(false)
   const wrapperRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const checkGoogleMaps = () => {
-      const google = (window as any).google as GoogleMaps | undefined
-      if (google && google.maps) {
-        try {
-          autocompleteService.current = new google.maps.places.AutocompleteService()
-          geocoder.current = new google.maps.Geocoder()
-          setIsLoadingScript(false)
-          setScriptError(false)
-        } catch (error) {
-          setScriptError(true)
-          setIsLoadingScript(false)
-        }
-      } else {
-        const script = document.createElement('script')
-        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBQZ9Z8Z8Z8Z8Z8Z8Z8Z8Z8Z8Z8Z8Z&libraries=places`
-        script.async = true
-        script.defer = true
-        
-        script.onload = () => {
-          try {
-            const google = (window as any).google as GoogleMaps | undefined
-            if (google && google.maps) {
-              autocompleteService.current = new google.maps.places.AutocompleteService()
-              geocoder.current = new google.maps.Geocoder()
-              setIsLoadingScript(false)
-              setScriptError(false)
-            }
-          } catch (error) {
-            setScriptError(true)
-            setIsLoadingScript(false)
-          }
-        }
-        
-        script.onerror = () => {
-          setScriptError(true)
-          setIsLoadingScript(false)
-        }
-        
-        document.head.appendChild(script)
-      }
-    }
-
-    checkGoogleMaps()
-  }, [])
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -113,53 +41,58 @@ export function LocationInput({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const handleAddressInputChange = (value: string) => {
+  const handleAddressInputChange = async (value: string) => {
     onAddressChange(value)
 
-    if (!value.trim() || !autocompleteService.current || scriptError) {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current)
+    }
+
+    if (!value.trim() || value.length < 3) {
       setPredictions([])
       setShowPredictions(false)
       return
     }
 
-    autocompleteService.current.getPlacePredictions(
-      {
-        input: value,
-        types: ['geocode', 'establishment']
-      },
-      (predictions: any, status: string) => {
-        const google = (window as any).google as GoogleMaps | undefined
-        if (status === google?.maps.places.PlacesServiceStatus.OK && predictions) {
-          setPredictions(predictions)
-          setShowPredictions(true)
-        } else {
-          setPredictions([])
-          setShowPredictions(false)
+    debounceTimer.current = setTimeout(async () => {
+      setIsLoading(true)
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value)}&limit=5&addressdetails=1`,
+          {
+            headers: {
+              'Accept': 'application/json',
+            }
+          }
+        )
+        
+        if (response.ok) {
+          const data = await response.json()
+          const formattedPredictions = data.map((item: any) => ({
+            description: item.display_name,
+            place_id: item.place_id.toString(),
+            lat: parseFloat(item.lat),
+            lng: parseFloat(item.lon)
+          }))
+          
+          setPredictions(formattedPredictions)
+          setShowPredictions(formattedPredictions.length > 0)
         }
+      } catch (error) {
+        console.error('Address lookup failed:', error)
+        setPredictions([])
+        setShowPredictions(false)
+      } finally {
+        setIsLoading(false)
       }
-    )
+    }, 500)
   }
 
-  const handleSelectPrediction = async (placeId: string, description: string) => {
-    if (!geocoder.current) return
-
-    try {
-      geocoder.current.geocode({ placeId }, (results: any, status: string) => {
-        const google = (window as any).google as GoogleMaps | undefined
-        if (status === google?.maps.GeocoderStatus.OK && results && results[0]) {
-          const location = results[0].geometry.location
-          onAddressChange(description, {
-            lat: location.lat(),
-            lng: location.lng()
-          })
-        } else {
-          onAddressChange(description)
-        }
-      })
-    } catch (error) {
-      onAddressChange(description)
-    }
-
+  const handleSelectPrediction = (prediction: any) => {
+    onAddressChange(prediction.description, {
+      lat: prediction.lat,
+      lng: prediction.lng
+    })
     setShowPredictions(false)
     setPredictions([])
   }
@@ -184,9 +117,9 @@ export function LocationInput({
             required
             className="text-base"
           />
-          {scriptError && (
+          {isLoading && (
             <p className="mt-1 text-xs text-muted-foreground">
-              Using basic text input (Maps unavailable)
+              Searching addresses...
             </p>
           )}
         </div>
@@ -206,7 +139,7 @@ export function LocationInput({
                     type="button"
                     variant="ghost"
                     className="w-full justify-start gap-3 rounded-none px-4 py-3 text-left font-normal hover:bg-accent"
-                    onClick={() => handleSelectPrediction(prediction.place_id, prediction.description)}
+                    onClick={() => handleSelectPrediction(prediction)}
                   >
                     <MapPin size={18} weight="duotone" className="shrink-0 text-primary" />
                     <span className="line-clamp-2 text-sm">{prediction.description}</span>
