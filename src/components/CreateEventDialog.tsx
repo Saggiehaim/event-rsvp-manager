@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ImageUpload } from './ImageUpload'
+import { LocationInput } from './LocationInput'
 import { CalendarPlus } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import type { Event } from '@/lib/types'
@@ -16,8 +17,15 @@ export function CreateEventDialog({ onEventCreated }: CreateEventDialogProps) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [location, setLocation] = useState('')
+  const [locationName, setLocationName] = useState('')
+  const [locationCoordinates, setLocationCoordinates] = useState<{ lat: number; lng: number } | undefined>()
   const [posterUrl, setPosterUrl] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleAddressChange = (address: string, coordinates?: { lat: number; lng: number }) => {
+    setLocation(address)
+    setLocationCoordinates(coordinates)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,6 +41,8 @@ export function CreateEventDialog({ onEventCreated }: CreateEventDialogProps) {
       id: `event-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: name.trim(),
       location: location.trim(),
+      locationName: locationName.trim() || undefined,
+      locationCoordinates,
       posterUrl: posterUrl || '',
       createdAt: Date.now(),
       rsvps: []
@@ -44,6 +54,8 @@ export function CreateEventDialog({ onEventCreated }: CreateEventDialogProps) {
     
     setName('')
     setLocation('')
+    setLocationName('')
+    setLocationCoordinates(undefined)
     setPosterUrl('')
     setIsSubmitting(false)
     setOpen(false)
@@ -54,6 +66,8 @@ export function CreateEventDialog({ onEventCreated }: CreateEventDialogProps) {
     if (!newOpen) {
       setName('')
       setLocation('')
+      setLocationName('')
+      setLocationCoordinates(undefined)
       setPosterUrl('')
     }
   }
@@ -90,19 +104,12 @@ export function CreateEventDialog({ onEventCreated }: CreateEventDialogProps) {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="location">
-              Location <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="123 Main Street, Brooklyn NY"
-              required
-              className="text-base"
-            />
-          </div>
+          <LocationInput
+            address={location}
+            locationName={locationName}
+            onAddressChange={handleAddressChange}
+            onLocationNameChange={setLocationName}
+          />
 
           <div className="flex gap-3 pt-2">
             <Button

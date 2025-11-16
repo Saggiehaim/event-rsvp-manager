@@ -13,11 +13,11 @@ A collaborative event management platform that enables hosts to create events wi
 ## Essential Features
 
 ### Event Creation
-- **Functionality**: Host creates an event by uploading a poster image, entering event name, and specifying location
-- **Purpose**: Provides a complete event identity that can be shared with potential guests
+- **Functionality**: Host creates an event by uploading a poster image, entering event name, location address (with Google Maps autocomplete), and optional location name
+- **Purpose**: Provides a complete event identity with precise location data that can be shared with potential guests
 - **Trigger**: User clicks "Create Event" button on landing page
-- **Progression**: Click create button → Upload poster image → Enter event name → Enter location → Submit → Event created with unique shareable link
-- **Success criteria**: Event is saved with all details, poster displays correctly, unique URL is generated for sharing
+- **Progression**: Click create button → Upload poster image → Enter event name → Type address (see Google Maps suggestions) → Select from autocomplete → Optionally add location name → Submit → Event created with unique shareable link and map coordinates
+- **Success criteria**: Event is saved with all details including coordinates, poster displays correctly, unique URL is generated for sharing, location can be opened in Google Maps
 
 ### Guest RSVP
 - **Functionality**: Guests visit event page and submit their name and number of people attending
@@ -112,6 +112,8 @@ Animations should feel celebratory but purposeful—subtle springy motions that 
   - Event poster display with aspect ratio lock (3:4 portrait orientation)
   - Guest counter component showing total headcount with animated number transitions
   - Copy-link button with toast confirmation
+  - Google Maps location input with autocomplete predictions dropdown
+  - Optional location name field for friendly venue naming
   
 - **States**:
   - Buttons: Default (primary gradient), Hover (lifted with enhanced shadow), Active (pressed scale), Loading (spinner), Disabled (muted with reduced opacity)

@@ -48,7 +48,12 @@ export function EventCard({ event, onClick }: EventCardProps) {
 
           <div className="flex items-start gap-2 text-sm text-muted-foreground">
             <MapPin size={18} weight="duotone" className="mt-0.5 shrink-0" />
-            <span className="line-clamp-2">{event.location}</span>
+            <div className="line-clamp-2">
+              {event.locationName && (
+                <span className="font-medium text-foreground">{event.locationName} - </span>
+              )}
+              <span>{event.location}</span>
+            </div>
           </div>
 
           <div className="flex items-center gap-2 text-sm text-muted-foreground">

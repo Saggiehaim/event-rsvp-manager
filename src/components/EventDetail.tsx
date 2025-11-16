@@ -106,9 +106,22 @@ export function EventDetail({ event, onBack, onRSVPSubmit }: EventDetailProps) {
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
                   <MapPin size={24} weight="duotone" className="shrink-0 text-primary" />
-                  <div>
+                  <div className="flex-1">
                     <p className="text-sm font-medium text-muted-foreground">Location</p>
+                    {event.locationName && (
+                      <p className="text-base font-semibold text-foreground">{event.locationName}</p>
+                    )}
                     <p className="text-base text-foreground">{event.location}</p>
+                    {event.locationCoordinates && (
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${event.locationCoordinates.lat},${event.locationCoordinates.lng}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-1 inline-flex items-center text-sm text-primary hover:underline"
+                      >
+                        View on Google Maps →
+                      </a>
+                    )}
                   </div>
                 </div>
 
