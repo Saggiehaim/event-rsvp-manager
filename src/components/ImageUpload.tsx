@@ -22,42 +22,14 @@ export function ImageUpload({ value, onChange, className }: ImageUploadProps) {
     }
 
     setUploading(true)
-    try {
-      const reader = new FileReader()
-      reader.onload = async (e) => {
-        if (e.target?.result) {
-          const dataUrl = e.target.result as string
-          
-          // Upload to blob storage
-          const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
-          const response = await fetch('/api/upload-image', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              fileName,
-              data: dataUrl,
-              contentType: file.type
-            })
-          })
-          
-          if (!response.ok) {
-            console.error('Failed to upload image:', response.status)
-            // Fallback to base64 if upload fails
-            onChange(dataUrl)
-            setUploading(false)
-            return
-          }
-          
-          const result = await response.json()
-          onChange(result.url)
-          setUploading(false)
-        }
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      if (e.target?.result) {
+        onChange(e.target.result as string)
+        setUploading(false)
       }
-      reader.readAsDataURL(file)
-    } catch (error) {
-      console.error('Image upload error:', error)
-      setUploading(false)
     }
+    reader.readAsDataURL(file)
   }, [onChange])
 
   const handleDrop = useCallback((e: React.DragEvent) => {

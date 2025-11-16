@@ -12,13 +12,24 @@ export function useAzureKV<T>(key: string, defaultValue: T): [T, (updater: (curr
     let cancelled = false
     async function load() {
       try {
-        const res = await fetch(`/api/kv/${encodeURIComponent(key)}`)
-        if (!res.ok) throw new Error('Failed to fetch KV')
-        const data = await res.json()
-        if (!cancelled) {
-          if (data.value !== null && data.value !== undefined) setValue(data.value as T)
-          else setValue(defaultValue)
-          setLoading(false)
+        // Special handling for events array
+        if (key === 'events') {
+          const res = await fetch('/api/events')
+          if (!res.ok) throw new Error('Failed to fetch events')
+          const events = await res.json()
+          if (!cancelled) {
+            setValue(events as T)
+            setLoading(false)
+          }
+        } else {
+          const res = await fetch(`/api/kv/${encodeURIComponent(key)}`)
+          if (!res.ok) throw new Error('Failed to fetch KV')
+          const data = await res.json()
+          if (!cancelled) {
+            if (data.value !== null && data.value !== undefined) setValue(data.value as T)
+            else setValue(defaultValue)
+            setLoading(false)
+          }
         }
       } catch (err) {
         console.error(`Failed to load key ${key}:`, err)
@@ -36,23 +47,57 @@ export function useAzureKV<T>(key: string, defaultValue: T): [T, (updater: (curr
     setValue((current) => {
       const next = updater(current)
       console.log(`[azureKV] Setting key ${key}:`, { current, next })
-      // Persist - fire and forget but log errors
-      const payload = { value: next }
-      console.log(`[azureKV] POST /api/kv/${key}`, payload)
-      fetch(`/api/kv/${encodeURIComponent(key)}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }).then(res => {
-        if (!res.ok) {
-          console.error(`Failed to persist key ${key}: ${res.status} ${res.statusText}`)
-          return res.text().then(text => console.error('Response:', text))
-        } else {
-          console.log(`[azureKV] Successfully persisted key ${key}`)
-        }
-      }).catch(err => {
-        console.error(`Network error persisting key ${key}:`, err)
-      })
+      
+      // Special handling for events array - save each event individually
+      if (key === 'events' && Array.isArray(next)) {
+        const events = next as any[]
+        const currentEvents = current as any[]
+        
+        // Find which events changed (new or modified)
+        const changedEvents = events.filter(event => {
+          const existing = currentEvents.find(e => e.id === event.id)
+          return !existing || JSON.stringify(existing) !== JSON.stringify(event)
+        })
+        
+        console.log(`[azureKV] Upserting ${changedEvents.length} changed events`)
+        
+        // Upsert each changed event
+        changedEvents.forEach(event => {
+          fetch(`/api/events/${event.id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(event)
+          }).then(res => {
+            if (!res.ok) {
+              console.error(`Failed to persist event ${event.id}: ${res.status}`)
+              return res.text().then(text => console.error('Response:', text))
+            } else {
+              console.log(`[azureKV] Successfully persisted event ${event.id}`)
+            }
+          }).catch(err => {
+            console.error(`Network error persisting event ${event.id}:`, err)
+          })
+        })
+      } else {
+        // Standard KV persistence
+        const payload = { value: next }
+        console.log(`[azureKV] POST /api/kv/${key}`, payload)
+        fetch(`/api/kv/${encodeURIComponent(key)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).then(res => {
+          if (!res.ok) {
+            console.error(`Failed to persist key ${key}: ${res.status} ${res.statusText}`)
+            return res.text().then(text => console.error('Response:', text))
+          } else {
+            console.log(`[azureKV] Successfully persisted key ${key}`)
+          }
+        }).catch(err => {
+          console.error(`Network error persisting key ${key}:`, err)
+        })
+      }
+      
       return next
     })
   }, [key])
