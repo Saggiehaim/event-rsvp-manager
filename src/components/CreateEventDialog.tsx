@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ImageUpload } from './ImageUpload'
 import { LocationInput } from './LocationInput'
-import { CalendarPlus } from '@phosphor-icons/react'
+import { CalendarPlus, CalendarBlank, Clock } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import type { Event } from '@/lib/types'
 
@@ -21,6 +21,8 @@ export function CreateEventDialog({ onEventCreated, googleApiKey }: CreateEventD
   const [locationName, setLocationName] = useState('')
   const [locationCoordinates, setLocationCoordinates] = useState<{ lat: number; lng: number } | undefined>()
   const [posterUrl, setPosterUrl] = useState('')
+  const [eventDate, setEventDate] = useState('')
+  const [eventTime, setEventTime] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleAddressChange = (address: string, coordinates?: { lat: number; lng: number }) => {
@@ -46,6 +48,8 @@ export function CreateEventDialog({ onEventCreated, googleApiKey }: CreateEventD
       locationCoordinates,
       posterUrl: posterUrl || '',
       createdAt: Date.now(),
+      eventDate: eventDate ? new Date(eventDate).getTime() : undefined,
+      eventTime: eventTime || undefined,
       rsvps: []
     }
 
@@ -58,6 +62,8 @@ export function CreateEventDialog({ onEventCreated, googleApiKey }: CreateEventD
     setLocationName('')
     setLocationCoordinates(undefined)
     setPosterUrl('')
+    setEventDate('')
+    setEventTime('')
     setIsSubmitting(false)
     setOpen(false)
   }
@@ -70,6 +76,8 @@ export function CreateEventDialog({ onEventCreated, googleApiKey }: CreateEventD
       setLocationName('')
       setLocationCoordinates(undefined)
       setPosterUrl('')
+      setEventDate('')
+      setEventTime('')
     }
   }
 
@@ -103,6 +111,36 @@ export function CreateEventDialog({ onEventCreated, googleApiKey }: CreateEventD
               required
               className="text-base"
             />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="event-date" className="flex items-center gap-2">
+                <CalendarBlank size={16} weight="duotone" />
+                Event Date
+              </Label>
+              <Input
+                id="event-date"
+                type="date"
+                value={eventDate}
+                onChange={(e) => setEventDate(e.target.value)}
+                className="text-base"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="event-time" className="flex items-center gap-2">
+                <Clock size={16} weight="duotone" />
+                Event Time
+              </Label>
+              <Input
+                id="event-time"
+                type="time"
+                value={eventTime}
+                onChange={(e) => setEventTime(e.target.value)}
+                className="text-base"
+              />
+            </div>
           </div>
 
           <LocationInput

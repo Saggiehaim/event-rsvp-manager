@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ImageUpload } from './ImageUpload'
 import { LocationInput } from './LocationInput'
+import { CalendarBlank, Clock } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import type { Event } from '@/lib/types'
 
@@ -22,6 +23,8 @@ export function EditEventDialog({ event, open, onOpenChange, onSave, googleApiKe
   const [locationName, setLocationName] = useState(event.locationName || '')
   const [locationCoordinates, setLocationCoordinates] = useState(event.locationCoordinates)
   const [posterUrl, setPosterUrl] = useState(event.posterUrl)
+  const [eventDate, setEventDate] = useState(event.eventDate ? new Date(event.eventDate).toISOString().split('T')[0] : '')
+  const [eventTime, setEventTime] = useState(event.eventTime || '')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
@@ -30,6 +33,8 @@ export function EditEventDialog({ event, open, onOpenChange, onSave, googleApiKe
     setLocationName(event.locationName || '')
     setLocationCoordinates(event.locationCoordinates)
     setPosterUrl(event.posterUrl)
+    setEventDate(event.eventDate ? new Date(event.eventDate).toISOString().split('T')[0] : '')
+    setEventTime(event.eventTime || '')
   }, [event])
 
   const handleAddressChange = (address: string, coordinates?: { lat: number; lng: number }) => {
@@ -52,7 +57,9 @@ export function EditEventDialog({ event, open, onOpenChange, onSave, googleApiKe
       location: location.trim(),
       locationName: locationName.trim() || undefined,
       locationCoordinates,
-      posterUrl: posterUrl || ''
+      posterUrl: posterUrl || '',
+      eventDate: eventDate ? new Date(eventDate).getTime() : undefined,
+      eventTime: eventTime || undefined
     }
 
     onSave(updatedEvent)
@@ -84,6 +91,36 @@ export function EditEventDialog({ event, open, onOpenChange, onSave, googleApiKe
               required
               className="text-base"
             />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="edit-event-date" className="flex items-center gap-2">
+                <CalendarBlank size={16} weight="duotone" />
+                Event Date
+              </Label>
+              <Input
+                id="edit-event-date"
+                type="date"
+                value={eventDate}
+                onChange={(e) => setEventDate(e.target.value)}
+                className="text-base"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-event-time" className="flex items-center gap-2">
+                <Clock size={16} weight="duotone" />
+                Event Time
+              </Label>
+              <Input
+                id="edit-event-time"
+                type="time"
+                value={eventTime}
+                onChange={(e) => setEventTime(e.target.value)}
+                className="text-base"
+              />
+            </div>
           </div>
 
           <LocationInput

@@ -8,7 +8,8 @@ import {
   Trash, 
   Users, 
   MapPin,
-  CalendarBlank 
+  CalendarBlank,
+  Clock
 } from '@phosphor-icons/react'
 import { EditEventDialog } from './EditEventDialog'
 import { DeleteEventDialog } from './DeleteEventDialog'
@@ -37,6 +38,22 @@ export function AdminPage({
   const [editingEvent, setEditingEvent] = useState<Event | null>(null)
   const [deletingEvent, setDeletingEvent] = useState<Event | null>(null)
   const [managingEvent, setManagingEvent] = useState<Event | null>(null)
+
+  const formatEventDate = (timestamp: number) => {
+    return new Date(timestamp).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    })
+  }
+
+  const formatEventTime = (time: string) => {
+    const [hours, minutes] = time.split(':')
+    const hour = parseInt(hours, 10)
+    const ampm = hour >= 12 ? 'PM' : 'AM'
+    const displayHour = hour % 12 || 12
+    return `${displayHour}:${minutes} ${ampm}`
+  }
 
   return (
     <motion.div
@@ -126,6 +143,27 @@ export function AdminPage({
                             </Badge>
                           )}
                         </div>
+
+                        {(event.eventDate || event.eventTime) && (
+                          <div className="flex flex-wrap gap-3">
+                            {event.eventDate && (
+                              <div className="flex items-center gap-2 text-sm">
+                                <CalendarBlank size={18} weight="duotone" className="text-primary" />
+                                <span className="font-medium text-foreground">
+                                  {formatEventDate(event.eventDate)}
+                                </span>
+                              </div>
+                            )}
+                            {event.eventTime && (
+                              <div className="flex items-center gap-2 text-sm">
+                                <Clock size={18} weight="duotone" className="text-primary" />
+                                <span className="font-medium text-foreground">
+                                  {formatEventTime(event.eventTime)}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        )}
 
                         <div className="flex items-start gap-2 text-sm text-muted-foreground">
                           <MapPin size={18} weight="duotone" className="mt-0.5 shrink-0" />

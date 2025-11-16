@@ -1,4 +1,4 @@
-import { MapPin, Users, CalendarBlank } from '@phosphor-icons/react'
+import { MapPin, Users, CalendarBlank, Clock } from '@phosphor-icons/react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { Event } from '@/lib/types'
@@ -12,6 +12,25 @@ interface EventCardProps {
 export function EventCard({ event, onClick }: EventCardProps) {
   const totalAttendees = event.rsvps.reduce((sum, rsvp) => sum + rsvp.attendeeCount, 0)
   const rsvpCount = event.rsvps.length
+
+  const formatEventDate = () => {
+    if (!event.eventDate) return null
+    return new Date(event.eventDate).toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    })
+  }
+
+  const formatEventTime = () => {
+    if (!event.eventTime) return null
+    const [hours, minutes] = event.eventTime.split(':')
+    const hour = parseInt(hours, 10)
+    const ampm = hour >= 12 ? 'PM' : 'AM'
+    const displayHour = hour % 12 || 12
+    return `${displayHour}:${minutes} ${ampm}`
+  }
 
   return (
     <motion.div
@@ -46,6 +65,23 @@ export function EventCard({ event, onClick }: EventCardProps) {
             </h3>
           </div>
 
+          {(event.eventDate || event.eventTime) && (
+            <div className="space-y-2">
+              {event.eventDate && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <CalendarBlank size={18} weight="duotone" className="shrink-0" />
+                  <span className="font-medium">{formatEventDate()}</span>
+                </div>
+              )}
+              {event.eventTime && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Clock size={18} weight="duotone" className="shrink-0" />
+                  <span className="font-medium">{formatEventTime()}</span>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="flex items-start gap-2 text-sm text-muted-foreground">
             <MapPin size={18} weight="duotone" className="mt-0.5 shrink-0" />
             <div className="line-clamp-2">
@@ -54,11 +90,6 @@ export function EventCard({ event, onClick }: EventCardProps) {
               )}
               <span>{event.location}</span>
             </div>
-          </div>
-
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <CalendarBlank size={18} weight="duotone" className="shrink-0" />
-            <span>{new Date(event.createdAt).toLocaleDateString()}</span>
           </div>
 
           <div className="flex items-center justify-between border-t border-border pt-3">

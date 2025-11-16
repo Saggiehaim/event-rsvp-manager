@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { MapPin, Copy, Check, ArrowLeft, Users, CalendarBlank } from '@phosphor-icons/react'
+import { MapPin, Copy, Check, ArrowLeft, Users, CalendarBlank, Clock } from '@phosphor-icons/react'
 import { RSVPForm } from './RSVPForm'
 import { GuestList } from './GuestList'
 import type { Event, RSVP } from '@/lib/types'
@@ -33,6 +33,25 @@ export function EventDetail({ event, onBack, onRSVPSubmit }: EventDetailProps) {
   }
 
   const totalAttendees = event.rsvps.reduce((sum, rsvp) => sum + rsvp.attendeeCount, 0)
+
+  const formatEventDate = () => {
+    if (!event.eventDate) return null
+    return new Date(event.eventDate).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+
+  const formatEventTime = () => {
+    if (!event.eventTime) return null
+    const [hours, minutes] = event.eventTime.split(':')
+    const hour = parseInt(hours, 10)
+    const ampm = hour >= 12 ? 'PM' : 'AM'
+    const displayHour = hour % 12 || 12
+    return `${displayHour}:${minutes} ${ampm}`
+  }
 
   return (
     <motion.div
@@ -104,6 +123,34 @@ export function EventDetail({ event, onBack, onRSVPSubmit }: EventDetailProps) {
               <Separator />
 
               <div className="space-y-3">
+                {(event.eventDate || event.eventTime) && (
+                  <>
+                    {event.eventDate && (
+                      <div className="flex items-start gap-3">
+                        <CalendarBlank size={24} weight="duotone" className="shrink-0 text-primary" />
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">Event Date</p>
+                          <p className="text-base font-semibold text-foreground">
+                            {formatEventDate()}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {event.eventTime && (
+                      <div className="flex items-start gap-3">
+                        <Clock size={24} weight="duotone" className="shrink-0 text-primary" />
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">Event Time</p>
+                          <p className="text-base font-semibold text-foreground">
+                            {formatEventTime()}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+
                 <div className="flex items-start gap-3">
                   <MapPin size={24} weight="duotone" className="shrink-0 text-primary" />
                   <div className="flex-1">
@@ -122,21 +169,6 @@ export function EventDetail({ event, onBack, onRSVPSubmit }: EventDetailProps) {
                         View on Google Maps →
                       </a>
                     )}
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <CalendarBlank size={24} weight="duotone" className="shrink-0 text-primary" />
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Created</p>
-                    <p className="text-base text-foreground">
-                      {new Date(event.createdAt).toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </p>
                   </div>
                 </div>
 

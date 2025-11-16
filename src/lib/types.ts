@@ -9,6 +9,8 @@ export interface Event {
   }
   posterUrl: string
   createdAt: number
+  eventDate?: number
+  eventTime?: string
   rsvps: RSVP[]
 }
 
