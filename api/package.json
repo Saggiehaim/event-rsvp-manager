@@ -5,7 +5,8 @@
   "type": "module",
   "dependencies": {
     "@azure/data-tables": "^13.3.0",
-    "@azure/functions": "^4.0.0"
+    "@azure/functions": "^4.0.0",
+    "@azure/storage-blob": "^12.17.0"
   },
   "devDependencies": {
     "@types/node": "^20.12.12"
