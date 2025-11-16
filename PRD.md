@@ -40,6 +40,13 @@ A collaborative event management platform that enables hosts to create events wi
 - **Progression**: Event created → Copy link button appears → Host shares link via any channel → Recipients access event directly
 - **Success criteria**: Link works for all users, event loads correctly, RSVP form is accessible
 
+### Admin Panel
+- **Functionality**: Centralized management interface for all events with edit, delete, and member management capabilities
+- **Purpose**: Provides event organizers complete control over their events and attendee lists
+- **Trigger**: User clicks "Admin Panel" button on main page
+- **Progression**: Click Admin Panel → View all events in list format → Select Edit to modify event details → Select Delete to remove event → Select Manage Members to add/remove attendees → Confirm changes → Return to main page
+- **Success criteria**: All events display with full details, edit updates persist correctly, delete removes event completely, member management updates RSVP list accurately
+
 ## Edge Case Handling
 
 - **Missing poster image**: Display placeholder with event name/initials on colored background
@@ -48,6 +55,9 @@ A collaborative event management platform that enables hosts to create events wi
 - **Long event names/locations**: Truncate with ellipsis on cards, show full text on detail view
 - **Invalid image uploads**: Validate file type (images only) and size limit (5MB), show error toast
 - **Empty guest list**: Show friendly "No RSVPs yet" message with encouraging copy
+- **Deleting events with RSVPs**: Show confirmation dialog with RSVP count warning before deletion
+- **Editing events with existing RSVPs**: Allow edits without affecting existing RSVP data
+- **Removing all members**: Allow clearing entire guest list if needed, show warning about total removal count
 
 ## Design Direction
 
@@ -100,10 +110,12 @@ Animations should feel celebratory but purposeful—subtle springy motions that 
   - Card: Event display cards with poster, name, and location - custom shadow and hover lift effect
   - Button: Primary actions (Create Event, Submit RSVP) using shadcn Button with size="lg" variant="default"
   - Input: Text fields for event name, location, guest name - shadcn Input with focus ring in primary color
-  - Dialog: Event creation modal - shadcn Dialog for focused creation flow
+  - Dialog: Event creation modal and edit modal - shadcn Dialog for focused creation flow
+  - AlertDialog: Destructive confirmation dialogs for delete actions - shadcn AlertDialog
   - Avatar: Guest list entries - shadcn Avatar with initials fallback for visual interest
   - Badge: Attendee count badges - shadcn Badge with custom colors for headcount display
-  - ScrollArea: Guest list container - shadcn ScrollArea for long guest lists
+  - ScrollArea: Guest list container and member management - shadcn ScrollArea for long guest lists
+  - Checkbox: Member selection in admin panel - shadcn Checkbox for bulk operations
   - Separator: Visual breaks between sections - shadcn Separator
   - Label: Form field labels - shadcn Label with consistent spacing
   
@@ -114,6 +126,9 @@ Animations should feel celebratory but purposeful—subtle springy motions that 
   - Copy-link button with toast confirmation
   - Google Maps location input with autocomplete predictions dropdown
   - Optional location name field for friendly venue naming
+  - Admin panel with comprehensive event list view showing all event details
+  - Member management dialog with multi-select checkboxes for bulk removal
+  - Edit event dialog reusing creation form with pre-populated values
   
 - **States**:
   - Buttons: Default (primary gradient), Hover (lifted with enhanced shadow), Active (pressed scale), Loading (spinner), Disabled (muted with reduced opacity)
@@ -129,6 +144,9 @@ Animations should feel celebratory but purposeful—subtle springy motions that 
   - Copy: Share link button
   - Check: Confirmation states
   - X: Close/cancel actions
+  - GearSix: Admin panel access
+  - PencilSimple: Edit event action
+  - Trash: Delete event action
   
 - **Spacing**:
   - Container padding: p-6 (24px) for cards, p-8 (32px) for main sections

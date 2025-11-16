@@ -4,12 +4,15 @@ import { Toaster } from '@/components/ui/sonner'
 import { CreateEventDialog } from '@/components/CreateEventDialog'
 import { EventCard } from '@/components/EventCard'
 import { EventDetail } from '@/components/EventDetail'
-import { CalendarBlank } from '@phosphor-icons/react'
+import { AdminPage } from '@/components/AdminPage'
+import { Button } from '@/components/ui/button'
+import { CalendarBlank, GearSix } from '@phosphor-icons/react'
 import type { Event, RSVP } from '@/lib/types'
 
 function App() {
   const [events, setEvents] = useKV<Event[]>('events', [])
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
+  const [isAdminMode, setIsAdminMode] = useState(false)
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -39,8 +42,45 @@ function App() {
     window.history.pushState({}, '', window.location.pathname)
   }
 
+  const handleEventUpdate = (eventId: string, updatedFields: Partial<Event>) => {
+    setEvents((currentEvents) =>
+      (currentEvents || []).map((event) =>
+        event.id === eventId ? { ...event, ...updatedFields } : event
+      )
+    )
+  }
+
+  const handleEventDelete = (eventId: string) => {
+    setEvents((currentEvents) => (currentEvents || []).filter((event) => event.id !== eventId))
+  }
+
+  const handleMembersUpdate = (eventId: string, selectedRsvpIds: string[]) => {
+    setEvents((currentEvents) =>
+      (currentEvents || []).map((event) =>
+        event.id === eventId
+          ? { ...event, rsvps: event.rsvps.filter((rsvp) => selectedRsvpIds.includes(rsvp.id)) }
+          : event
+      )
+    )
+  }
+
   const eventsList = events || []
   const selectedEvent = eventsList.find((e) => e.id === selectedEventId)
+
+  if (isAdminMode) {
+    return (
+      <div className="min-h-screen bg-background">
+        <AdminPage
+          events={eventsList}
+          onBack={() => setIsAdminMode(false)}
+          onEventUpdate={handleEventUpdate}
+          onEventDelete={handleEventDelete}
+          onMembersUpdate={handleMembersUpdate}
+        />
+        <Toaster position="top-center" />
+      </div>
+    )
+  }
 
   if (selectedEvent) {
     return (
@@ -71,7 +111,17 @@ function App() {
             </p>
           </div>
 
-          <CreateEventDialog onEventCreated={handleEventCreated} />
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setIsAdminMode(true)}
+              className="gap-2 shadow-sm"
+            >
+              <GearSix size={20} weight="duotone" />
+              Admin Panel
+            </Button>
+            <CreateEventDialog onEventCreated={handleEventCreated} />
+          </div>
         </div>
 
         {eventsList.length === 0 ? (
