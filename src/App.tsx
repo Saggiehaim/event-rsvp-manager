@@ -19,8 +19,9 @@ function App() {
     const params = new URLSearchParams(window.location.search)
     const eventId = params.get('event')
     const adminPath = params.get('page')
+    const pathname = window.location.pathname
     
-    if (adminPath === 'shadmin') {
+    if (adminPath === 'shadmin' || pathname === '/shadmin') {
       setIsAdminMode(true)
     } else if (eventId) {
       setSelectedEventId(eventId)
