@@ -1,19 +1,20 @@
 import { useEffect, useState } from 'react'
-import { useKV } from '@github/spark/hooks'
+// Replacing GitHub Spark KV with Azure-backed KV shim
+import { useKV } from '@/hooks/azureKV'
 import { Toaster } from '@/components/ui/sonner'
 import { CreateEventDialog } from '@/components/CreateEventDialog'
 import { EventCard } from '@/components/EventCard'
 import { EventDetail } from '@/components/EventDetail'
 import { AdminPage } from '@/components/AdminPage'
 import { CalendarBlank } from '@phosphor-icons/react'
-import { useGoogleMapsApiKey } from '@/lib/config'
+import { useGoogleMapsApiKeyAzure } from '@/hooks/azureKV'
 import type { Event, RSVP } from '@/lib/types'
 
 function App() {
   const [events, setEvents] = useKV<Event[]>('events', [])
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
   const [isAdminMode, setIsAdminMode] = useState(false)
-  const [googleApiKey] = useGoogleMapsApiKey()
+  const [googleApiKey] = useGoogleMapsApiKeyAzure()
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)

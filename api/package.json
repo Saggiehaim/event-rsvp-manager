@@ -1,0 +1,9 @@
+{
+  "name": "event-hub-api",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "dependencies": {
+    "@azure/data-tables": "^13.3.0"
+  }
+}
