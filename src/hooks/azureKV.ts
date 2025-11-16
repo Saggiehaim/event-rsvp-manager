@@ -6,7 +6,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 
 export function useAzureKV<T>(key: string, defaultValue: T): [T, (updater: (current: T) => T) => void] {
   const [value, setValue] = useState<T>(defaultValue)
-  const initialized = useRef(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let cancelled = false
@@ -18,27 +18,35 @@ export function useAzureKV<T>(key: string, defaultValue: T): [T, (updater: (curr
         if (!cancelled) {
           if (data.value !== null && data.value !== undefined) setValue(data.value as T)
           else setValue(defaultValue)
+          setLoading(false)
         }
-      } catch {
-        if (!cancelled) setValue(defaultValue)
+      } catch (err) {
+        console.error(`Failed to load key ${key}:`, err)
+        if (!cancelled) {
+          setValue(defaultValue)
+          setLoading(false)
+        }
       }
     }
-    if (!initialized.current) {
-      initialized.current = true
-      load()
-    }
+    load()
     return () => { cancelled = true }
   }, [key, defaultValue])
 
   const setter = useCallback((updater: (current: T) => T) => {
     setValue((current) => {
       const next = updater(current)
-      // Persist
+      // Persist - fire and forget but log errors
       fetch(`/api/kv/${encodeURIComponent(key)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ value: next })
-      }).catch(() => {/* ignore optimistic failure */})
+      }).then(res => {
+        if (!res.ok) {
+          console.error(`Failed to persist key ${key}: ${res.status} ${res.statusText}`)
+        }
+      }).catch(err => {
+        console.error(`Network error persisting key ${key}:`, err)
+      })
       return next
     })
   }, [key])
