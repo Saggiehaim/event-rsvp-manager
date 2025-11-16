@@ -1,19 +1,19 @@
 import { MapPin, Users, CalendarBlank, Clock } from '@phosphor-icons/react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { motion } from 'framer-motion'
 import type { Event } from '@/lib/types'
-  onClick: () => void
 
-  const totalAttendees = e
+interface EventCardProps {
   event: Event
-    if (!event.eventD
- 
+  onClick: () => void
+}
 
-    })
+export function EventCard({ event, onClick }: EventCardProps) {
+  const rsvpCount = event.rsvps.length
+  const totalAttendees = event.rsvps.reduce((sum, rsvp) => sum + (rsvp.attendeeCount || 1), 0)
 
-    if (!event.eventTime) return null
-
-    const displayHour = hour % 12
+  const formatEventDate = () => {
     if (!event.eventDate) return null
     return new Date(event.eventDate).toLocaleDateString('en-US', {
       weekday: 'short',
@@ -21,7 +21,7 @@ import type { Event } from '@/lib/types'
       day: 'numeric',
       year: 'numeric'
     })
-   
+  }
 
   const formatEventTime = () => {
     if (!event.eventTime) return null
@@ -30,38 +30,30 @@ import type { Event } from '@/lib/types'
     const ampm = hour >= 12 ? 'PM' : 'AM'
     const displayHour = hour % 12 || 12
     return `${displayHour}:${minutes} ${ampm}`
-   
+  }
 
-          
-               
-                  <span className="fo
-              )}
-                <div className="flex
-                  <span className="font-m
-              )}
-          )}
-     
-            <div className="line-clamp-2">
-                <span className="font-medium text-foreground">{event.l
-              <span>{event.loc
+  return (
+    <motion.div
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      className="cursor-pointer"
+      onClick={onClick}
+    >
+      <Card className="overflow-hidden transition-shadow hover:shadow-lg">
+        {event.posterUrl && (
+          <div className="aspect-video w-full overflow-hidden bg-muted">
+            <img
+              src={event.posterUrl}
+              alt={event.name}
+              className="h-full w-full object-cover"
+            />
           </div>
-          <div className="flex item
-              <Users size={18}
-                {rsvpCount} {rsvpCount === 1 ? 'Guest' : 'Guests'}
-            </
-            {to
-                {totalAttendees} attending
-            )}
-        </div>
-    </motion.div>
-}
-
-
-
-
-
-
-
+        )}
+        
+        <div className="space-y-4 p-6">
+          <div>
+            <h3 className="text-xl font-semibold text-foreground line-clamp-2">
+              {event.name}
             </h3>
           </div>
 
