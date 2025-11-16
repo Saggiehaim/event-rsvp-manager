@@ -1,4 +1,4 @@
-import { TableClient, odata } from '@azure/data-tables'
+import { TableClient } from '@azure/data-tables'
 
 // Expects connection string in env: TABLE_STORAGE_CONNECTION_STRING
 // Table name: KvStore (PartitionKey='KV', RowKey=key)
@@ -17,12 +17,22 @@ export function getTableClient() {
 
 export async function ensureTableExists() {
   const client = getTableClient()
+  // Try a lightweight list operation; if table missing create a seed entity
   try {
+    // This will throw on non-existing table when querying an entity
     await client.getEntity('HEALTH', 'ping')
   } catch (e: any) {
     if (e.statusCode === 404) {
-      // create a dummy entity to force table creation
+      try {
+        await client.createEntity({ partitionKey: 'HEALTH', rowKey: 'ping', ts: Date.now() })
+      } catch (inner: any) {
+        if (inner.statusCode !== 409) throw inner
+      }
+    } else if (e.code === 'ResourceNotFound') {
       await client.createEntity({ partitionKey: 'HEALTH', rowKey: 'ping', ts: Date.now() })
+    } else {
+      // Non-table-missing error should surface
+      throw e
     }
   }
 }
