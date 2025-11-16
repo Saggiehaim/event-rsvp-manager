@@ -5,8 +5,7 @@ import { CreateEventDialog } from '@/components/CreateEventDialog'
 import { EventCard } from '@/components/EventCard'
 import { EventDetail } from '@/components/EventDetail'
 import { AdminPage } from '@/components/AdminPage'
-import { Button } from '@/components/ui/button'
-import { CalendarBlank, GearSix } from '@phosphor-icons/react'
+import { CalendarBlank } from '@phosphor-icons/react'
 import type { Event, RSVP } from '@/lib/types'
 
 function App() {
@@ -17,7 +16,11 @@ function App() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const eventId = params.get('event')
-    if (eventId) {
+    const adminPath = params.get('page')
+    
+    if (adminPath === 'shadmin') {
+      setIsAdminMode(true)
+    } else if (eventId) {
       setSelectedEventId(eventId)
     }
   }, [])
@@ -39,6 +42,11 @@ function App() {
 
   const handleBack = () => {
     setSelectedEventId(null)
+    window.history.pushState({}, '', window.location.pathname)
+  }
+
+  const handleAdminBack = () => {
+    setIsAdminMode(false)
     window.history.pushState({}, '', window.location.pathname)
   }
 
@@ -72,7 +80,7 @@ function App() {
       <div className="min-h-screen bg-background">
         <AdminPage
           events={eventsList}
-          onBack={() => setIsAdminMode(false)}
+          onBack={handleAdminBack}
           onEventUpdate={handleEventUpdate}
           onEventDelete={handleEventDelete}
           onMembersUpdate={handleMembersUpdate}
@@ -112,14 +120,6 @@ function App() {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setIsAdminMode(true)}
-              className="gap-2 shadow-sm"
-            >
-              <GearSix size={20} weight="duotone" />
-              Admin Panel
-            </Button>
             <CreateEventDialog onEventCreated={handleEventCreated} />
           </div>
         </div>
