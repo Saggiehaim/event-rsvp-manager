@@ -17,11 +17,20 @@ export async function ensureContainerExists() {
   const containerClient = client.getContainerClient(CONTAINER_NAME)
   
   try {
-    await containerClient.createIfNotExists({
-      access: 'blob' // Public read access for blob URLs
-    })
+    const exists = await containerClient.exists()
+    if (!exists) {
+      console.log('Creating container:', CONTAINER_NAME)
+      await containerClient.create({
+        access: 'blob' // Public read access for blob URLs
+      })
+      console.log('Container created successfully')
+    }
   } catch (e) {
-    console.error('Error ensuring container exists:', e)
+    // If container already exists (409), that's fine
+    if (e.statusCode !== 409) {
+      console.error('Error ensuring container exists:', e)
+      throw e
+    }
   }
 }
 

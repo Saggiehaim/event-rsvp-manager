@@ -2,9 +2,11 @@ import { uploadBlob } from '../shared/blobClient.js'
 
 export default async function (context, req) {
   try {
+    context.log('Upload request received')
     const body = req.body
     
     if (!body || !body.fileName || !body.data) {
+      context.log.error('Missing required fields:', { hasFileName: !!body?.fileName, hasData: !!body?.data })
       context.res = { status: 400, body: 'Missing fileName or data' }
       return
     }
@@ -19,6 +21,7 @@ export default async function (context, req) {
     
     // Convert base64 to buffer
     const buffer = Buffer.from(base64Data, 'base64')
+    context.log('Buffer created, size:', buffer.length)
     
     // Validate size (5MB limit)
     if (buffer.length > 5 * 1024 * 1024) {
@@ -26,7 +29,7 @@ export default async function (context, req) {
       return
     }
     
-    context.log('Uploading image:', fileName, 'size:', buffer.length)
+    context.log('Uploading image:', fileName, 'size:', buffer.length, 'type:', contentType)
     
     // Upload to blob storage
     const url = await uploadBlob(fileName, buffer, contentType || 'image/jpeg')
@@ -40,6 +43,7 @@ export default async function (context, req) {
     }
   } catch (error) {
     context.log.error('upload-image error:', error)
+    context.log.error('Error stack:', error.stack)
     context.res = { status: 500, body: `Error: ${error.message}` }
   }
 }
