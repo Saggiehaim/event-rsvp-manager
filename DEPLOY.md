@@ -2,10 +2,10 @@
 
 This Event Hub application is configured for GitHub Pages deployment.
 
-## Quick Deploy
+1. **Build the 
 
-1. **Build the application:**
-   ```bash
+
+
    npm run build
    ```
 
@@ -30,38 +30,38 @@ This Event Hub application is configured for GitHub Pages deployment.
      pages: write
      id-token: write
    
-   jobs:
-     build:
-       runs-on: ubuntu-latest
-       steps:
-         - uses: actions/checkout@v4
-         
-         - name: Setup Node.js
-           uses: actions/setup-node@v4
-           with:
-             node-version: '20'
+        
+           
              cache: 'npm'
+         - na
          
-         - name: Install dependencies
-           run: npm ci
-         
-         - name: Build
-           run: npm run build
          
          - name: Setup Pages
-           uses: actions/configure-pages@v4
          
-         - name: Upload artifact
-           uses: actions/upload-pages-artifact@v3
-           with:
+           uses:
              path: './dist'
+         - name: Deploy t
          
-         - name: Deploy to GitHub Pages
-           id: deployment
-           uses: actions/deploy-pages@v4
-   ```
    
-   Then:
+   - Go to your reposi
+   - Push
+   ### Option B: Manua
+   1. Install gh-pages:
+      npm
+   
+      ```json
+        "
+      ```
+   3. Run:
+      npm run de
+   
+      - G
+
+
+- **Base path**: `./` (relative paths fo
+- **.n
+## 
+Make sur
    - Go to your repository Settings → Pages
    - Under "Build and deployment", select "GitHub Actions" as the source
    - Push to main branch to trigger deployment
@@ -99,6 +99,15 @@ The application is configured with:
 ## Repository Settings
 
 Make sure to enable GitHub Pages in your repository:
+1. Go to Settings → Pages
+2. Choose your deployment method (GitHub Actions or branch)
+3. Your site will be available at: `https://<username>.github.io/<repository>/`
+
+## Notes
+
+- The `.nojekyll` file ensures GitHub Pages serves your files correctly
+- All assets use relative paths for portability
+- The Spark runtime features (KV storage, LLM API) work in the browser
 1. Go to Settings → Pages
 2. Choose your deployment method (GitHub Actions or branch)
 3. Your site will be available at: `https://<username>.github.io/<repository>/`
