@@ -35,14 +35,20 @@ export function useAzureKV<T>(key: string, defaultValue: T): [T, (updater: (curr
   const setter = useCallback((updater: (current: T) => T) => {
     setValue((current) => {
       const next = updater(current)
+      console.log(`[azureKV] Setting key ${key}:`, { current, next })
       // Persist - fire and forget but log errors
+      const payload = { value: next }
+      console.log(`[azureKV] POST /api/kv/${key}`, payload)
       fetch(`/api/kv/${encodeURIComponent(key)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ value: next })
+        body: JSON.stringify(payload)
       }).then(res => {
         if (!res.ok) {
           console.error(`Failed to persist key ${key}: ${res.status} ${res.statusText}`)
+          return res.text().then(text => console.error('Response:', text))
+        } else {
+          console.log(`[azureKV] Successfully persisted key ${key}`)
         }
       }).catch(err => {
         console.error(`Network error persisting key ${key}:`, err)
