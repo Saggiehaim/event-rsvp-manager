@@ -2,18 +2,18 @@ import { MapPin, Users, CalendarBlank, Clock } from '@phosphor-icons/react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { Event } from '@/lib/types'
-import { motion } from 'framer-motion'
-
-interface EventCardProps {
-  event: Event
   onClick: () => void
-}
 
-export function EventCard({ event, onClick }: EventCardProps) {
-  const totalAttendees = event.rsvps.reduce((sum, rsvp) => sum + rsvp.attendeeCount, 0)
-  const rsvpCount = event.rsvps.length
+  const totalAttendees = e
+  event: Event
+    if (!event.eventD
+ 
 
-  const formatEventDate = () => {
+    })
+
+    if (!event.eventTime) return null
+
+    const displayHour = hour % 12
     if (!event.eventDate) return null
     return new Date(event.eventDate).toLocaleDateString('en-US', {
       weekday: 'short',
@@ -21,7 +21,7 @@ export function EventCard({ event, onClick }: EventCardProps) {
       day: 'numeric',
       year: 'numeric'
     })
-  }
+   
 
   const formatEventTime = () => {
     if (!event.eventTime) return null
@@ -30,38 +30,38 @@ export function EventCard({ event, onClick }: EventCardProps) {
     const ampm = hour >= 12 ? 'PM' : 'AM'
     const displayHour = hour % 12 || 12
     return `${displayHour}:${minutes} ${ampm}`
-  }
+   
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      whileHover={{ y: -4, scale: 1.02 }}
-      onClick={onClick}
-      className="cursor-pointer"
-    >
-      <Card className="overflow-hidden shadow-md transition-shadow hover:shadow-xl">
-        <div className="aspect-[3/4] w-full overflow-hidden bg-muted">
-          {event.posterUrl ? (
-            <img
-              src={event.posterUrl}
-              alt={event.name}
-              className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/20">
-              <div className="flex h-32 w-32 items-center justify-center rounded-full bg-white/90 text-4xl font-bold text-primary shadow-lg">
-                {event.name.charAt(0).toUpperCase()}
-              </div>
-            </div>
+          
+               
+                  <span className="fo
+              )}
+                <div className="flex
+                  <span className="font-m
+              )}
           )}
+     
+            <div className="line-clamp-2">
+                <span className="font-medium text-foreground">{event.l
+              <span>{event.loc
+          </div>
+          <div className="flex item
+              <Users size={18}
+                {rsvpCount} {rsvpCount === 1 ? 'Guest' : 'Guests'}
+            </
+            {to
+                {totalAttendees} attending
+            )}
         </div>
-        
-        <div className="space-y-3 p-5">
-          <div>
-            <h3 className="line-clamp-2 text-xl font-bold leading-tight text-foreground">
-              {event.name}
+    </motion.div>
+}
+
+
+
+
+
+
+
             </h3>
           </div>
 
