@@ -5,7 +5,6 @@ import { CreateEventDialog } from '@/components/CreateEventDialog'
 import { EventCard } from '@/components/EventCard'
 import { EventDetail } from '@/components/EventDetail'
 import { AdminPage } from '@/components/AdminPage'
-import { SettingsDialog } from '@/components/SettingsDialog'
 import { CalendarBlank } from '@phosphor-icons/react'
 import { useGoogleMapsApiKey } from '@/lib/config'
 import type { Event, RSVP } from '@/lib/types'
@@ -125,7 +124,6 @@ function App() {
 
           <div className="flex flex-wrap items-center justify-center gap-3">
             <CreateEventDialog onEventCreated={handleEventCreated} googleApiKey={googleApiKey} />
-            <SettingsDialog />
           </div>
         </div>
 

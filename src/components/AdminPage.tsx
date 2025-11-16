@@ -13,6 +13,7 @@ import {
 import { EditEventDialog } from './EditEventDialog'
 import { DeleteEventDialog } from './DeleteEventDialog'
 import { ManageMembersDialog } from './ManageMembersDialog'
+import { SettingsDialog } from './SettingsDialog'
 import type { Event } from '@/lib/types'
 import { motion } from 'framer-motion'
 
@@ -63,6 +64,7 @@ export function AdminPage({
             Manage all events and attendees
           </p>
         </div>
+        <SettingsDialog />
       </div>
 
       {events.length === 0 ? (
