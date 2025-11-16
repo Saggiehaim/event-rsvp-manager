@@ -10,6 +10,7 @@ const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: './',
   plugins: [
     react(),
     tailwindcss(),
@@ -22,4 +23,5 @@ export default defineConfig({
       '@': resolve(projectRoot, 'src')
     }
   },
+  publicDir: 'public',
 });
