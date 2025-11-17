@@ -118,6 +118,11 @@ export function EventDetail({ event, onBack, onRSVPSubmit }: EventDetailProps) {
                 <h1 className="text-3xl font-bold leading-tight tracking-tight text-foreground">
                   {event.name}
                 </h1>
+                {event.description && (
+                  <p className="mt-3 text-base text-muted-foreground leading-relaxed">
+                    {event.description}
+                  </p>
+                )}
               </div>
 
               <Separator />
@@ -186,6 +191,11 @@ export function EventDetail({ event, onBack, onRSVPSubmit }: EventDetailProps) {
                         </Badge>
                       )}
                     </div>
+                    {totalAttendees > 0 && (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {event.rsvps.reduce((sum, rsvp) => sum + rsvp.adults, 0)} adults, {event.rsvps.reduce((sum, rsvp) => sum + rsvp.kids, 0)} kids
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>

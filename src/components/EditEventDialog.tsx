@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { ImageUpload } from './ImageUpload'
 import { LocationInput } from './LocationInput'
 import { CalendarBlank, Clock } from '@phosphor-icons/react'
@@ -19,6 +20,7 @@ interface EditEventDialogProps {
 
 export function EditEventDialog({ event, open, onOpenChange, onSave, googleApiKey }: EditEventDialogProps) {
   const [name, setName] = useState(event.name)
+  const [description, setDescription] = useState(event.description || '')
   const [location, setLocation] = useState(event.location)
   const [locationName, setLocationName] = useState(event.locationName || '')
   const [locationCoordinates, setLocationCoordinates] = useState(event.locationCoordinates)
@@ -29,6 +31,7 @@ export function EditEventDialog({ event, open, onOpenChange, onSave, googleApiKe
 
   useEffect(() => {
     setName(event.name)
+    setDescription(event.description || '')
     setLocation(event.location)
     setLocationName(event.locationName || '')
     setLocationCoordinates(event.locationCoordinates)
@@ -54,6 +57,7 @@ export function EditEventDialog({ event, open, onOpenChange, onSave, googleApiKe
 
     const updatedEvent: Partial<Event> = {
       name: name.trim(),
+      description: description.trim() || undefined,
       location: location.trim(),
       locationName: locationName.trim() || undefined,
       locationCoordinates,
@@ -90,6 +94,20 @@ export function EditEventDialog({ event, open, onOpenChange, onSave, googleApiKe
               placeholder="Summer BBQ Party"
               required
               className="text-base"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="edit-event-description">
+              Description
+            </Label>
+            <Textarea
+              id="edit-event-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Tell guests what to expect..."
+              rows={3}
+              className="text-base resize-none"
             />
           </div>
 

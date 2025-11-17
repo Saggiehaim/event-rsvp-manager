@@ -14,7 +14,8 @@ interface RSVPFormProps {
 
 export function RSVPForm({ onSubmit }: RSVPFormProps) {
   const [guestName, setGuestName] = useState('')
-  const [attendeeCount, setAttendeeCount] = useState('1')
+  const [adults, setAdults] = useState('1')
+  const [kids, setKids] = useState('0')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,18 +26,24 @@ export function RSVPForm({ onSubmit }: RSVPFormProps) {
       return
     }
 
-    const count = parseInt(attendeeCount, 10)
-    if (isNaN(count) || count < 0) {
-      toast.error('Please enter a valid number of attendees')
+    const adultsCount = parseInt(adults, 10)
+    const kidsCount = parseInt(kids, 10)
+    
+    if (isNaN(adultsCount) || adultsCount < 0 || isNaN(kidsCount) || kidsCount < 0) {
+      toast.error('Please enter valid numbers')
       return
     }
+
+    const totalCount = adultsCount + kidsCount
 
     setIsSubmitting(true)
 
     const newRSVP: RSVP = {
       id: `rsvp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       guestName: guestName.trim(),
-      attendeeCount: count,
+      attendeeCount: totalCount,
+      adults: adultsCount,
+      kids: kidsCount,
       timestamp: Date.now()
     }
 
@@ -44,10 +51,11 @@ export function RSVPForm({ onSubmit }: RSVPFormProps) {
 
     onSubmit(newRSVP)
     
-    toast.success(count === 0 ? 'Thanks for letting us know!' : `Thanks for your RSVP, ${guestName.trim()}!`)
+    toast.success(totalCount === 0 ? 'Thanks for letting us know!' : `Thanks for your RSVP, ${guestName.trim()}!`)
     
     setGuestName('')
-    setAttendeeCount('1')
+    setAdults('1')
+    setKids('0')
     setIsSubmitting(false)
   }
 
@@ -73,23 +81,41 @@ export function RSVPForm({ onSubmit }: RSVPFormProps) {
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="attendee-count">
-            Number of People <span className="text-destructive">*</span>
-          </Label>
-          <Input
-            id="attendee-count"
-            type="number"
-            min="0"
-            value={attendeeCount}
-            onChange={(e) => setAttendeeCount(e.target.value)}
-            required
-            className="text-base"
-          />
-          <p className="text-xs text-muted-foreground">
-            Enter 0 if you can't make it
-          </p>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="adults">
+              Adults <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="adults"
+              type="number"
+              min="0"
+              value={adults}
+              onChange={(e) => setAdults(e.target.value)}
+              required
+              className="text-base"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="kids">
+              Kids <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="kids"
+              type="number"
+              min="0"
+              value={kids}
+              onChange={(e) => setKids(e.target.value)}
+              required
+              className="text-base"
+            />
+          </div>
         </div>
+
+        <p className="text-xs text-muted-foreground">
+          Enter 0 for both if you can't make it
+        </p>
 
         <motion.div
           whileHover={{ scale: 1.02 }}

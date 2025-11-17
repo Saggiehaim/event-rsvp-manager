@@ -15,7 +15,7 @@ import { EditEventDialog } from './EditEventDialog'
 import { DeleteEventDialog } from './DeleteEventDialog'
 import { ManageMembersDialog } from './ManageMembersDialog'
 import { SettingsDialog } from './SettingsDialog'
-import type { Event } from '@/lib/types'
+import type { Event, RSVP } from '@/lib/types'
 import { motion } from 'framer-motion'
 
 interface AdminPageProps {
@@ -23,7 +23,7 @@ interface AdminPageProps {
   onBack: () => void
   onEventUpdate: (eventId: string, updatedEvent: Partial<Event>) => void
   onEventDelete: (eventId: string) => void
-  onMembersUpdate: (eventId: string, rsvpIds: string[]) => void
+  onMembersUpdate: (eventId: string, updatedRsvps: RSVP[]) => void
   googleApiKey?: string
 }
 
@@ -129,6 +129,11 @@ export function AdminPage({
                           <p className="text-sm text-muted-foreground">
                             Created {new Date(event.createdAt).toLocaleDateString()}
                           </p>
+                          {event.description && (
+                            <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                              {event.description}
+                            </p>
+                          )}
                         </div>
 
                         <div className="flex flex-wrap items-center gap-3">
@@ -139,7 +144,7 @@ export function AdminPage({
                           {totalAttendees > 0 && (
                             <Badge className="gap-1.5 bg-teal/10 text-teal hover:bg-teal/20">
                               <CalendarBlank size={14} weight="duotone" />
-                              {totalAttendees} attending
+                              {totalAttendees} attending ({event.rsvps.reduce((sum, rsvp) => sum + rsvp.adults, 0)} adults, {event.rsvps.reduce((sum, rsvp) => sum + rsvp.kids, 0)} kids)
                             </Badge>
                           )}
                         </div>
@@ -241,8 +246,8 @@ export function AdminPage({
           event={managingEvent}
           open={!!managingEvent}
           onOpenChange={(open) => !open && setManagingEvent(null)}
-          onSave={(rsvpIds) => {
-            onMembersUpdate(managingEvent.id, rsvpIds)
+          onSave={(updatedRsvps) => {
+            onMembersUpdate(managingEvent.id, updatedRsvps)
             setManagingEvent(null)
           }}
         />

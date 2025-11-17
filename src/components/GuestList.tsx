@@ -87,7 +87,9 @@ export function GuestList({ rsvps }: GuestListProps) {
                       {rsvp.attendeeCount}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {rsvp.attendeeCount === 1 ? 'person' : 'people'}
+                      {rsvp.adults > 0 && `${rsvp.adults} adult${rsvp.adults !== 1 ? 's' : ''}`}
+                      {rsvp.adults > 0 && rsvp.kids > 0 && ', '}
+                      {rsvp.kids > 0 && `${rsvp.kids} kid${rsvp.kids !== 1 ? 's' : ''}`}
                     </span>
                   </div>
                 )}

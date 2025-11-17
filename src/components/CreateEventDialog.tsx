@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { ImageUpload } from './ImageUpload'
 import { LocationInput } from './LocationInput'
 import { CalendarPlus, CalendarBlank, Clock } from '@phosphor-icons/react'
@@ -17,6 +18,7 @@ interface CreateEventDialogProps {
 export function CreateEventDialog({ onEventCreated, googleApiKey }: CreateEventDialogProps) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
   const [location, setLocation] = useState('')
   const [locationName, setLocationName] = useState('')
   const [locationCoordinates, setLocationCoordinates] = useState<{ lat: number; lng: number } | undefined>()
@@ -43,6 +45,7 @@ export function CreateEventDialog({ onEventCreated, googleApiKey }: CreateEventD
     const newEvent: Event = {
       id: `event-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: name.trim(),
+      description: description.trim() || undefined,
       location: location.trim(),
       locationName: locationName.trim() || undefined,
       locationCoordinates,
@@ -58,6 +61,8 @@ export function CreateEventDialog({ onEventCreated, googleApiKey }: CreateEventD
     toast.success('Event created successfully!')
     
     setName('')
+    setDescription('')
+    setLocation('')'')
     setLocation('')
     setLocationName('')
     setLocationCoordinates(undefined)
@@ -110,6 +115,20 @@ export function CreateEventDialog({ onEventCreated, googleApiKey }: CreateEventD
               placeholder="Summer BBQ Party"
               required
               className="text-base"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="event-description">
+              Description
+            </Label>
+            <Textarea
+              id="event-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Tell guests what to expect..."
+              rows={3}
+              className="text-base resize-none"
             />
           </div>
 

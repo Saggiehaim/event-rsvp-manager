@@ -66,11 +66,11 @@ function App() {
     setEvents((currentEvents) => (currentEvents || []).filter((event) => event.id !== eventId))
   }
 
-  const handleMembersUpdate = (eventId: string, selectedRsvpIds: string[]) => {
+  const handleMembersUpdate = (eventId: string, updatedRsvps: RSVP[]) => {
     setEvents((currentEvents) =>
       (currentEvents || []).map((event) =>
         event.id === eventId
-          ? { ...event, rsvps: event.rsvps.filter((rsvp) => selectedRsvpIds.includes(rsvp.id)) }
+          ? { ...event, rsvps: updatedRsvps }
           : event
       )
     )
