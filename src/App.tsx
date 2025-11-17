@@ -16,6 +16,30 @@ function App() {
   const [isAdminMode, setIsAdminMode] = useState(false)
   const [googleApiKey] = useGoogleMapsApiKeyAzure()
 
+  // Helper to set or update meta tags (Open Graph & Twitter)
+  const setMetaTag = (attr: 'name' | 'property', key: string, value: string) => {
+    if (!value) return
+    let tag = document.head.querySelector<HTMLMetaElement>(`meta[${attr}='${key}']`)
+    if (!tag) {
+      tag = document.createElement('meta')
+      tag.setAttribute(attr, key)
+      document.head.appendChild(tag)
+    }
+    tag.setAttribute('content', value)
+  }
+
+  const applyDefaultMeta = () => {
+    document.title = 'Event Hub - Create & Share Events'
+    setMetaTag('property', 'og:title', 'Event Hub')
+    setMetaTag('property', 'og:description', 'Create events and invite guests to RSVP')
+    setMetaTag('property', 'og:image', '')
+    setMetaTag('property', 'og:url', window.location.href)
+    setMetaTag('name', 'twitter:card', 'summary')
+    setMetaTag('name', 'twitter:title', 'Event Hub')
+    setMetaTag('name', 'twitter:description', 'Create events and invite guests to RSVP')
+    setMetaTag('name', 'twitter:image', '')
+  }
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const eventId = params.get('event')
@@ -78,6 +102,31 @@ function App() {
 
   const eventsList = events || []
   const selectedEvent = eventsList.find((e) => e.id === selectedEventId)
+
+  // Apply dynamic Open Graph & Twitter metadata when selectedEvent changes
+  useEffect(() => {
+    if (selectedEvent) {
+      // Use event fields
+      const title = selectedEvent.name || 'Event'
+      const description = selectedEvent.description || 'Join us for this event.'
+      const image = selectedEvent.posterUrl || ''
+      document.title = `${title} – Event Hub`
+
+      setMetaTag('property', 'og:title', title)
+      setMetaTag('property', 'og:description', description)
+      if (image) setMetaTag('property', 'og:image', image)
+      setMetaTag('property', 'og:type', 'website')
+      setMetaTag('property', 'og:url', window.location.href)
+
+      // Twitter tags
+      setMetaTag('name', 'twitter:card', image ? 'summary_large_image' : 'summary')
+      setMetaTag('name', 'twitter:title', title)
+      setMetaTag('name', 'twitter:description', description)
+      if (image) setMetaTag('name', 'twitter:image', image)
+    } else {
+      applyDefaultMeta()
+    }
+  }, [selectedEvent])
 
   if (isAdminMode) {
     return (
