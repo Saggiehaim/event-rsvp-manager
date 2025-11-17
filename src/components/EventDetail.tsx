@@ -20,7 +20,8 @@ export function EventDetail({ event, onBack, onRSVPSubmit }: EventDetailProps) {
   const [copied, setCopied] = useState(false)
 
   const handleCopyLink = async () => {
-    const url = `${window.location.origin}${window.location.pathname}?event=${event.id}`
+    // Use share-event endpoint for proper OG metadata in social sharing
+    const url = `${window.location.origin}/api/share-event/${event.id}`
     
     try {
       await navigator.clipboard.writeText(url)
