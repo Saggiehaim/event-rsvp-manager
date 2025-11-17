@@ -150,8 +150,8 @@ export default async function (context, req) {
 <body>
     <div class="container">
       ${image 
-        ? \`<img src='\${escapeHtml(image)}' alt='\${escapeHtml(title)}' class='poster'/>\`
-        : \`<div class='poster-placeholder'>\${escapeHtml(title.charAt(0).toUpperCase())}</div>\`
+        ? `<img src='${escapeHtml(image)}' alt='${escapeHtml(title)}' class='poster'/>`
+        : `<div class='poster-placeholder'>${escapeHtml(title.charAt(0).toUpperCase())}</div>`
       }
       <div class="content">
         <h1>${escapeHtml(title)}</h1>
