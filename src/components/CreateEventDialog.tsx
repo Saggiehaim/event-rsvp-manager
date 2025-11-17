@@ -62,7 +62,6 @@ export function CreateEventDialog({ onEventCreated, googleApiKey }: CreateEventD
     
     setName('')
     setDescription('')
-    setLocation('')'')
     setLocation('')
     setLocationName('')
     setLocationCoordinates(undefined)
