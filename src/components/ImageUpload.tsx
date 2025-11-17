@@ -23,10 +23,39 @@ export function ImageUpload({ value, onChange, className }: ImageUploadProps) {
 
     setUploading(true)
     const reader = new FileReader()
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       if (e.target?.result) {
-        onChange(e.target.result as string)
-        setUploading(false)
+        const dataUrl = e.target.result as string
+        
+        try {
+          // Upload to blob storage
+          const fileName = `${Date.now()}-${file.name}`
+          const response = await fetch('/api/upload-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              fileName,
+              data: dataUrl,
+              contentType: file.type
+            })
+          })
+          
+          if (!response.ok) {
+            const error = await response.text()
+            console.error('Upload failed:', error)
+            throw new Error(`Upload failed: ${error}`)
+          }
+          
+          const result = await response.json()
+          console.log('Image uploaded to blob storage:', result.url)
+          onChange(result.url)
+        } catch (error) {
+          console.error('Error uploading image:', error)
+          // Fallback to data URL if upload fails
+          onChange(dataUrl)
+        } finally {
+          setUploading(false)
+        }
       }
     }
     reader.readAsDataURL(file)

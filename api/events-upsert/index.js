@@ -12,15 +12,12 @@ export default async function (context, req) {
     context.log('Upserting event:', body.id)
     const client = getTableClient()
     
-    // Extract posterUrl to avoid 64KB property size limit
-    const { posterUrl, ...eventWithoutPoster } = body
-    
     // Store each event as separate entity: PartitionKey='EVENT', RowKey=eventId
+    // posterUrl should be a blob URL, not base64 data
     const entity = {
       partitionKey: 'EVENT',
       rowKey: body.id,
-      eventData: JSON.stringify(eventWithoutPoster),
-      posterUrl: posterUrl || ''
+      eventData: JSON.stringify(body)
     }
     
     await client.upsertEntity(entity, 'Replace')
