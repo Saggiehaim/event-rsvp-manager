@@ -87,6 +87,17 @@ function App() {
   }
 
   const handleEventDelete = (eventId: string) => {
+    console.log('[App] Deleting event', eventId)
+    // Direct API call to ensure deletion even if diff detection fails
+    fetch(`/api/events/${eventId}`, { method: 'DELETE' })
+      .then(res => {
+        if (!res.ok) {
+          console.error('[App] Event delete failed', eventId, res.status)
+          return res.text().then(t => console.error('Response:', t))
+        }
+        console.log('[App] Event delete request succeeded', eventId)
+      })
+      .catch(err => console.error('[App] Network error deleting event', eventId, err))
     setEvents((currentEvents) => (currentEvents || []).filter((event) => event.id !== eventId))
   }
 
