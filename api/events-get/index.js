@@ -12,6 +12,10 @@ export default async function (context) {
     for await (const entity of entities) {
       try {
         const eventData = JSON.parse(entity.eventData)
+        // Restore posterUrl from separate column
+        if (entity.posterUrl) {
+          eventData.posterUrl = entity.posterUrl
+        }
         events.push(eventData)
       } catch (e) {
         context.log.error('Failed to parse event:', entity.rowKey, e)
