@@ -22,28 +22,30 @@ export default async function (context, req) {
     }
     
     // Handle POST/PUT (upsert)
-    const body = req.body
-    
-    if (!body || !body.id) {
+    const body = req.body || {}
+    const eventId = context.bindingData.id || body.id
+
+    if (!eventId) {
       context.res = { status: 400, body: 'Missing event id' }
       return
     }
-    
-    context.log('Upserting event:', body.id)
-    const client = getTableClient()
-    
-    // Store each event as separate entity: PartitionKey='EVENT', RowKey=eventId
-    // posterUrl should be a blob URL, not base64 data
-    const entity = {
-      partitionKey: 'EVENT',
-      rowKey: body.id,
-      eventData: JSON.stringify(body)
+
+    if (!body.id) body.id = eventId
+
+    context.log('Upserting event:', eventId)
+    try {
+      const entity = {
+        partitionKey: 'EVENT',
+        rowKey: eventId,
+        eventData: JSON.stringify(body)
+      }
+      await client.upsertEntity(entity, 'Replace')
+      context.log('Event upserted successfully:', eventId)
+      context.res = { status: 204 }
+    } catch (innerErr) {
+      context.log.error('Upsert failure for event:', eventId, innerErr)
+      context.res = { status: 500, body: `Upsert error: ${innerErr.message}` }
     }
-    
-    await client.upsertEntity(entity, 'Replace')
-    context.log('Event upserted successfully:', body.id)
-    
-    context.res = { status: 204 }
   } catch (error) {
     context.log.error('events-upsert error:', error)
     context.res = { status: 500, body: `Error: ${error.message}` }
