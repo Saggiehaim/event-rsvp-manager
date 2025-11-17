@@ -6,7 +6,7 @@
       "direction": "in",
       "name": "req",
       "methods": ["get"],
-      "route": "e/{id}"
+      "route": "share/{id}"
     },
     {
       "type": "http",
