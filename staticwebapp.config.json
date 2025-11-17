@@ -1,13 +1,14 @@
 {
   "routes": [
     {
-      "route": "/api/event-share/*",
+      "route": "/share/:id",
+      "rewrite": "/api/event-share/:id",
       "allowedRoles": ["anonymous"]
     }
   ],
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/api/*", "/*.{css,scss,sass,js,json,ico,svg,png,jpg,jpeg,gif,webp,woff,woff2,ttf,eot}"]
+    "exclude": ["/api/*", "/share/*", "/*.{css,scss,sass,js,json,ico,svg,png,jpg,jpeg,gif,webp,woff,woff2,ttf,eot}"]
   },
   "responseOverrides": {
     "404": {
