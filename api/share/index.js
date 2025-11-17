@@ -29,7 +29,8 @@ export default async function (context, req) {
     const title = event.name || 'Event'
     const description = event.description || 'Join us for this event.'
     const image = event.posterUrl || ''
-    const url = `https://${req.headers.host}/?event=${eventId}`
+    // Canonical share URL (pretty path) - front-end will link to /e/{id}
+    const url = `https://${req.headers.host}/e/${eventId}`
 
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -52,12 +53,15 @@ export default async function (context, req) {
     <meta name="twitter:description" content="${escapeHtml(description)}">
     <meta name="twitter:image" content="${escapeHtml(image)}">
     
-    <!-- Redirect users (not crawlers) to the React app -->
-    <meta http-equiv="refresh" content="0;url=${escapeHtml(url)}">
-    <script>window.location.href = '${escapeHtml(url).replace(/'/g, "\\'")}';</script>
+    <link rel="canonical" href="${escapeHtml(url)}" />
 </head>
 <body>
-    <p>Loading event... <a href="${escapeHtml(url)}">Click here if not redirected</a></p>
+    <main style="font-family: system-ui, sans-serif; padding: 32px; max-width: 640px; margin: auto;">
+      <h1>${escapeHtml(title)}</h1>
+      <p>${escapeHtml(description)}</p>
+      ${image ? `<img src='${escapeHtml(image)}' alt='${escapeHtml(title)}' style='max-width:100%;border-radius:8px;'/>` : ''}
+      <p><a href="${escapeHtml(url)}">Open full event page</a></p>
+    </main>
 </body>
 </html>`
 
