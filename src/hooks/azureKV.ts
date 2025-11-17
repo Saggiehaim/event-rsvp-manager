@@ -59,7 +59,12 @@ export function useAzureKV<T>(key: string, defaultValue: T): [T, (updater: (curr
           return !existing || JSON.stringify(existing) !== JSON.stringify(event)
         })
         
-        console.log(`[azureKV] Upserting ${changedEvents.length} changed events`)
+        // Find which events were deleted
+        const deletedEvents = currentEvents.filter(oldEvent => 
+          !events.find(e => e.id === oldEvent.id)
+        )
+        
+        console.log(`[azureKV] Upserting ${changedEvents.length} changed events, deleting ${deletedEvents.length} events`)
         
         // Upsert each changed event
         changedEvents.forEach(event => {
@@ -76,6 +81,22 @@ export function useAzureKV<T>(key: string, defaultValue: T): [T, (updater: (curr
             }
           }).catch(err => {
             console.error(`Network error persisting event ${event.id}:`, err)
+          })
+        })
+        
+        // Delete removed events
+        deletedEvents.forEach(event => {
+          fetch(`/api/events/${event.id}`, {
+            method: 'DELETE'
+          }).then(res => {
+            if (!res.ok) {
+              console.error(`Failed to delete event ${event.id}: ${res.status}`)
+              return res.text().then(text => console.error('Response:', text))
+            } else {
+              console.log(`[azureKV] Successfully deleted event ${event.id}`)
+            }
+          }).catch(err => {
+            console.error(`Network error deleting event ${event.id}:`, err)
           })
         })
       } else {

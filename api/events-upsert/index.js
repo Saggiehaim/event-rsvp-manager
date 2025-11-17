@@ -2,6 +2,26 @@ import { getTableClient } from '../shared/tableClient.js'
 
 export default async function (context, req) {
   try {
+    const client = getTableClient()
+    
+    // Handle DELETE request
+    if (req.method === 'DELETE') {
+      const eventId = context.bindingData.id
+      
+      if (!eventId) {
+        context.res = { status: 400, body: 'Missing event id' }
+        return
+      }
+      
+      context.log('Deleting event:', eventId)
+      await client.deleteEntity('EVENT', eventId)
+      context.log('Event deleted successfully:', eventId)
+      
+      context.res = { status: 200, body: { message: 'Event deleted successfully' } }
+      return
+    }
+    
+    // Handle POST/PUT (upsert)
     const body = req.body
     
     if (!body || !body.id) {
