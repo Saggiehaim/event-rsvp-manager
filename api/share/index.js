@@ -29,8 +29,9 @@ export default async function (context, req) {
     const title = event.name || 'Event'
     const description = event.description || 'Join us for this event.'
     const image = event.posterUrl || ''
-    // Canonical share URL (pretty path) - front-end will link to /e/{id}
-    const url = `https://${req.headers.host}/e/${eventId}`
+    // Canonical event page URL uses query param only; relative avoids wrong host issues
+    const eventPageUrl = `/?event=${eventId}`
+    const absoluteEventUrl = `https://${req.headers.host}${eventPageUrl}`
 
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -43,7 +44,7 @@ export default async function (context, req) {
     <meta property="og:title" content="${escapeHtml(title)}">
     <meta property="og:description" content="${escapeHtml(description)}">
     <meta property="og:image" content="${escapeHtml(image)}">
-    <meta property="og:url" content="${escapeHtml(url)}">
+    <meta property="og:url" content="${escapeHtml(absoluteEventUrl)}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Event Hub">
     
@@ -53,14 +54,14 @@ export default async function (context, req) {
     <meta name="twitter:description" content="${escapeHtml(description)}">
     <meta name="twitter:image" content="${escapeHtml(image)}">
     
-    <link rel="canonical" href="${escapeHtml(url)}" />
+    <link rel="canonical" href="${escapeHtml(absoluteEventUrl)}" />
 </head>
 <body>
     <main style="font-family: system-ui, sans-serif; padding: 32px; max-width: 640px; margin: auto;">
       <h1>${escapeHtml(title)}</h1>
       <p>${escapeHtml(description)}</p>
       ${image ? `<img src='${escapeHtml(image)}' alt='${escapeHtml(title)}' style='max-width:100%;border-radius:8px;'/>` : ''}
-      <p><a href="${escapeHtml(url)}">Open full event page</a></p>
+      <p><a href="${escapeHtml(eventPageUrl)}">Open full event page</a></p>
     </main>
 </body>
 </html>`
